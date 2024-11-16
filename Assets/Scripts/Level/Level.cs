@@ -33,6 +33,10 @@ public class Level : MonoBehaviour
     private float currentTime;
     private int starsEarned;
 
+    private Vector2 touchStartPosition;
+    private bool isTouchValid = false;
+    private const float MAX_TOUCH_MOVEMENT = 10f; // Maximum pixels of movement allowed for a valid touch
+
     private void Awake()
     {
         mainCamera = Camera.main;
@@ -81,10 +85,67 @@ public class Level : MonoBehaviour
 
     private void HandleInput()
     {
-        if (Input.GetMouseButtonDown(0))
+        // Cancel touch if second finger is added
+        if (Input.touchCount > 1)
         {
-            Vector2 touchPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-            CheckItemHit(touchPosition);
+            isTouchValid = false;
+            return;
+        }
+
+        // Handle touch input
+        if (Input.touchCount == 1)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    touchStartPosition = touch.position;
+                    isTouchValid = true;
+                    break;
+
+                case TouchPhase.Moved:
+                    // If finger moved too much, invalidate the touch
+                    if (isTouchValid && Vector2.Distance(touchStartPosition, touch.position) > MAX_TOUCH_MOVEMENT)
+                    {
+                        isTouchValid = false;
+                    }
+                    break;
+
+                case TouchPhase.Ended:
+                    if (isTouchValid)
+                    {
+                        Vector2 touchPosition = mainCamera.ScreenToWorldPoint(touch.position);
+                        CheckItemHit(touchPosition);
+                    }
+                    isTouchValid = false;
+                    break;
+            }
+        }
+        // Handle mouse input for editor/desktop
+        else if (Application.isEditor || !Application.isMobilePlatform)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                touchStartPosition = Input.mousePosition;
+                isTouchValid = true;
+            }
+            else if (Input.GetMouseButton(0))
+            {
+                if (isTouchValid && Vector2.Distance(touchStartPosition, (Vector2)Input.mousePosition) > MAX_TOUCH_MOVEMENT)
+                {
+                    isTouchValid = false;
+                }
+            }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                if (isTouchValid)
+                {
+                    Vector2 touchPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    CheckItemHit(touchPosition);
+                }
+                isTouchValid = false;
+            }
         }
     }
 
