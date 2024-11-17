@@ -138,6 +138,30 @@ public class LevelManager : MonoBehaviour
     {
         return levelPrefabs;
     }
+
+    public void ReturnToMainMenu()
+    {
+        // update main menu level items' progress numbers
+        if (activeLevel != null)
+        {
+            LevelElement[] levelElements = mainMenuScreen.GetComponentsInChildren<LevelElement>();
+            for (int i = 0; i < levelElements.Length; i++)
+            {
+                levelElements[i].UpdateProgress(levelPrefabs[i], IsLevelUnlocked(levelPrefabs[i].levelName));
+            }
+        }
+
+        // Clean up active level if it exists
+        if (activeLevel != null)
+        {
+            Destroy(activeLevel.gameObject);
+            activeLevel = null;
+        }
+
+        // Show main menu
+        mainMenuScreen.SetActive(true);
+        
+    }
 }
 
 [System.Serializable]

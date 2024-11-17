@@ -69,6 +69,9 @@ public class GoalsPanel : MonoBehaviour
             UpdateGoalCount(i);
         }
 
+        // resize the width of the goals container to fit the goal slots
+        goalsContainer.sizeDelta = new Vector2(goalSlots.Length * 200 + 20, goalsContainer.sizeDelta.y);
+
         // Subscribe to events
         level.onItemFound.AddListener(OnItemFound);
     }

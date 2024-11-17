@@ -334,6 +334,7 @@ MonoBehaviour:
     - {fileID: 3162628351347882740}
     - {fileID: 7247504113757990165}
     - {fileID: 701643952666796209}
+    foundItems: []
   - groupName: Dogs
     groupIcon: {fileID: 21300000, guid: 19ed4f5023e744b458e9c8e4ca5bd34f, type: 3}
     items:
@@ -346,6 +347,7 @@ MonoBehaviour:
     - {fileID: 2803013073736840917}
     - {fileID: 7593539164442207418}
     - {fileID: 6708861831823568767}
+    foundItems: []
   - groupName: Ducks
     groupIcon: {fileID: 21300000, guid: 0561e093540b842508eb7dbd6102c9dd, type: 3}
     items:
@@ -357,6 +359,7 @@ MonoBehaviour:
     - {fileID: 203660679950395883}
     - {fileID: 7015646743654592404}
     - {fileID: 7650333348371280606}
+    foundItems: []
   - groupName: Food
     groupIcon: {fileID: -1861151504, guid: 3c5d317bd0a2941258f706a2f20c0908, type: 3}
     items:
@@ -379,6 +382,7 @@ MonoBehaviour:
     - {fileID: 48675812867185741}
     - {fileID: 7901470851396158669}
     - {fileID: 8029944022938727784}
+    foundItems: []
   itemFoundEffectPrefab: {fileID: 129898, guid: df4dcf6abd99c407388ca478677e3ccb, type: 3}
   confettiEffect: {fileID: 19877600, guid: 36bdc02b23d9ca94d93bd715c0cca5c0, type: 3}
   onItemFound:
@@ -387,7 +391,6 @@ MonoBehaviour:
   onLevelComplete:
     m_PersistentCalls:
       m_Calls: []
-  levelTimer: 0
 --- !u!1001 &119211656892765358
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1136,11 +1139,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.115
+      value: 0.534
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4.13
+      value: -2.542
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2320,11 +2323,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.44
+      value: 2.64
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4.565
+      value: -3.49
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.z
@@ -8674,11 +8677,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.37
+      value: -2.1
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4.605
+      value: 1.68
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.z
@@ -10343,11 +10346,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.24
+      value: 1.35
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4
+      value: -0.25
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.z
@@ -12608,11 +12611,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.81
+      value: -2.56
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4.3055
+      value: -3.516
       objectReference: {fileID: 0}
     - target: {fileID: 941051787302785578, guid: 8be4ebec0b4e548138567018637086d7, type: 3}
       propertyPath: m_LocalPosition.z
