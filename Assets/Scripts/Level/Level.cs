@@ -10,8 +10,8 @@ public class Level : MonoBehaviour
         public string groupName;
         public Sprite groupIcon;
         public HiddenObject[] items;
+        public List<string> foundItems = new List<string>();
         public int totalItems => items?.Length ?? 0;
-        public int remainingItems { get; set; }
     }
 
     [Header("Level Data")]
@@ -28,11 +28,6 @@ public class Level : MonoBehaviour
     public UnityEvent<Vector3, string> onItemFound = new UnityEvent<Vector3, string>();
     public UnityEvent onLevelComplete = new UnityEvent();
 
-    [Header("Level Settings")]
-    [SerializeField] private float levelTimer;
-    private float currentTime;
-    private int starsEarned;
-
     private Vector2 touchStartPosition;
     private bool isTouchValid = false;
     private const float MAX_TOUCH_MOVEMENT = 10f; // Maximum pixels of movement allowed for a valid touch
@@ -44,8 +39,13 @@ public class Level : MonoBehaviour
 
     private void Start()
     {
+        if (LevelManager.Instance == null)
+        {
+            Debug.LogError("LevelManager.Instance is null! Ensure LevelManager is initialized before loading levels.");
+            return;
+        }
+
         InitializeLevel();
-        currentTime = 0f;
 
         // Find and initialize the GoalsPanel
         GoalsPanel goalsPanel = FindObjectOfType<GoalsPanel>();
@@ -61,17 +61,42 @@ public class Level : MonoBehaviour
 
     private void InitializeLevel()
     {
+        if (string.IsNullOrEmpty(levelName))
+        {
+            Debug.LogError("Level name is not set!");
+            return;
+        }
+
+        var progress = LevelManager.Instance.GetLevelProgress(levelName);
+        if (progress == null)
+        {
+            Debug.LogError($"Could not get progress for level: {levelName}");
+            return;
+        }
+
         // Initialize each group's remaining items count
         foreach (var group in itemGroups)
         {
-            group.remainingItems = group.totalItems;
-            
-            // Set the group ID for each item
+            if (group == null || group.items == null)
+            {
+                Debug.LogError("Null item group or items array found!");
+                continue;
+            }
+
             foreach (var item in group.items)
             {
                 if (item != null)
                 {
-                    item.Initialize(item.GetComponent<SpriteRenderer>().sprite, group.groupName, item.TouchAreaRadius);
+                    // Initialize all items, not just found ones
+                    item.InitHiddenObject(group.groupName);
+
+                    // Check if item was previously found
+                    if (progress.foundItems.Contains(item.ItemId))
+                    {
+                        //add to found list
+                        group.foundItems.Add(item.ItemId);
+                        item.gameObject.SetActive(false);
+                    }
                 }
             }
         }
@@ -79,7 +104,6 @@ public class Level : MonoBehaviour
 
     private void Update()
     {
-        currentTime += Time.deltaTime;
         HandleInput();
     }
 
@@ -151,11 +175,11 @@ public class Level : MonoBehaviour
 
     private void CheckItemHit(Vector2 position)
     {
-        RaycastHit2D hit = Physics2D.CircleCast(position, 0.1f, Vector2.zero);
+        Collider2D hitCollider = Physics2D.OverlapPoint(position);
         
-        if (hit.collider != null)
+        if (hitCollider != null)
         {
-            HiddenObject item = hit.collider.GetComponent<HiddenObject>();
+            HiddenObject item = hitCollider.GetComponent<HiddenObject>();
             if (item != null && item.TryFind())
             {
                 HandleItemFound(item);
@@ -165,6 +189,7 @@ public class Level : MonoBehaviour
 
     private void HandleItemFound(HiddenObject item)
     {
+        Debug.Log("GAME>> Item found: " + item.GroupId);
         Vector3 itemPosition = item.transform.position;
         
         // Spawn effect
@@ -178,21 +203,14 @@ public class Level : MonoBehaviour
         {
             if (group.groupName == item.GroupId)
             {
-                group.remainingItems--;
+                //add item to found list
+                group.foundItems.Add(item.ItemId);
                 break;
             }
         }
         
         // Notify listeners (UI will handle this)
         onItemFound.Invoke(itemPosition, item.GroupId);
-        
-        // Calculate stars based on time and completion
-        if (currentTime <= levelTimer * 0.5f)
-            starsEarned = 3;
-        else if (currentTime <= levelTimer * 0.75f)
-            starsEarned = 2;
-        else
-            starsEarned = 1;
         
         // Check if level is complete
         CheckLevelComplete();
@@ -201,9 +219,12 @@ public class Level : MonoBehaviour
     private void CheckLevelComplete()
     {
         bool isComplete = true;
+
+        // Check if all items are found in each group
         foreach (var group in itemGroups)
         {
-            if (group.remainingItems > 0)
+            Debug.Log($"Group {group.groupName} has {group.totalItems} items, found {group.foundItems.Count}");
+            if (group.totalItems > group.foundItems.Count)
             {
                 isComplete = false;
                 break;
@@ -215,12 +236,9 @@ public class Level : MonoBehaviour
             confettiEffect.Play();
             
             // Save progress
-            LevelSelection.Instance.UpdateLevelProgress(
+            LevelManager.Instance.UpdateLevelProgress(
                 levelName,
-                true,
-                starsEarned,
-                currentTime,
-                coinsReward
+                true
             );
             
             onLevelComplete.Invoke();

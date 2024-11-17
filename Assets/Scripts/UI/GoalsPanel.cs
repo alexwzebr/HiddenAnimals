@@ -118,7 +118,7 @@ public class GoalsPanel : MonoBehaviour
         var slot = goalSlots[index];
 
         slot.UpdateCount(
-            group.totalItems - group.remainingItems,
+            group.foundItems.Count,
             group.totalItems
         );
     }

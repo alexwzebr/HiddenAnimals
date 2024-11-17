@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 
-public class LevelSelection : MonoBehaviour
+public class LevelManager : MonoBehaviour
 {
-    private const string CURRENT_LEVEL_KEY = "CurrentLevel";
     private const string LEVEL_PROGRESS_KEY = "LevelProgress";
+    private const string FIRST_TIME_KEY = "IsFirstTime";
 
     [SerializeField] private GridLayoutGroup levelGrid;
     [SerializeField] private GameObject mainMenuScreen;
@@ -14,17 +14,15 @@ public class LevelSelection : MonoBehaviour
 
     private Dictionary<string, LevelProgressData> levelProgress;
     private Level[] levelPrefabs;
-    private string currentLevelId;
-    private Level currentLevel;
+    private Level activeLevel;
 
-    public static LevelSelection Instance { get; private set; }
+    public static LevelManager Instance { get; private set; }
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            InitializeLevels();
         }
         else
         {
@@ -32,11 +30,14 @@ public class LevelSelection : MonoBehaviour
         }
     }
 
-    private void InitializeLevels()
+    public void InitializeLevels()
     {
+        Debug.Log("LOAD>> InitializeLevels");
+
         // Get all level elements from the grid
         LevelElement[] levelElements = levelGrid.GetComponentsInChildren<LevelElement>();
         levelPrefabs = levelElements.Select(le => le.LevelPrefab).ToArray();
+        Debug.Log("LOAD>> Levels count: " + levelPrefabs.Length);
 
         LoadProgress();
 
@@ -47,14 +48,19 @@ public class LevelSelection : MonoBehaviour
             levelElements[i].Initialize(isUnlocked);
             levelElements[i].mainMenuScreen = mainMenuScreen;
         }
+
+        bool isFirstTime = PlayerPrefs.GetInt(FIRST_TIME_KEY, 1) == 1;
+        if (isFirstTime)
+        {
+            PlayerPrefs.SetInt(FIRST_TIME_KEY, 0);
+            PlayerPrefs.Save();
+            StartLevel(levelPrefabs[0].levelName);
+        }
     }
 
     private void LoadProgress()
     {
-        // Load current level
-        currentLevelId = PlayerPrefs.GetString(CURRENT_LEVEL_KEY, levelPrefabs[0].levelName);
-
-        // Load level progress
+        // get progress for each le player prefs
         string progressJson = PlayerPrefs.GetString(LEVEL_PROGRESS_KEY, "");
         if (string.IsNullOrEmpty(progressJson))
         {
@@ -66,13 +72,9 @@ public class LevelSelection : MonoBehaviour
             levelProgress = progressList.levels.ToDictionary(p => p.levelId, p => p);
         }
     }
-
+    
     public void SaveProgress()
     {
-        // Save current level
-        PlayerPrefs.SetString(CURRENT_LEVEL_KEY, currentLevelId);
-
-        // Save level progress
         var progressList = new LevelProgressDataList
         {
             levels = levelProgress.Values.ToArray()
@@ -82,30 +84,24 @@ public class LevelSelection : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    public Level GetCurrentLevelPrefab()
+    public void StartLevel(string levelId)
     {
-        return levelPrefabs.FirstOrDefault(l => l.levelName == currentLevelId);
-    }
-
-    public void LoadLevel(string levelId)
-    {
-        // Clean up current level if it exists
-        if (currentLevel != null)
+        Debug.Log("LOAD>> LoadLevel");
+        // Clean up active level if it exists
+        if (activeLevel != null)
         {
-            Destroy(currentLevel.gameObject);
+            Destroy(activeLevel.gameObject);
         }
 
-        currentLevelId = levelId;
-        SaveProgress();
+        mainMenuScreen.SetActive(false);
 
         // Instantiate new level
-        Level levelPrefab = GetCurrentLevelPrefab();
+        Level levelPrefab = levelPrefabs.FirstOrDefault(l => l.levelName == levelId);
         if (levelPrefab != null)
         {
-            currentLevel = Instantiate(levelPrefab, levelContainer);
-            currentLevel.transform.localPosition = Vector3.zero;
-            currentLevel.transform.localRotation = Quaternion.identity;
-            currentLevel.transform.localScale = Vector3.one;
+            activeLevel = Instantiate(levelPrefab, levelContainer);
+            activeLevel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            activeLevel.transform.localScale = Vector3.one;
         }
         else
         {
@@ -122,13 +118,10 @@ public class LevelSelection : MonoBehaviour
         return levelProgress[levelId];
     }
 
-    public void UpdateLevelProgress(string levelId, bool completed, int stars, float time, int coins)
+    public void UpdateLevelProgress(string levelId, bool completed)
     {
         var progress = GetLevelProgress(levelId);
         progress.isCompleted = completed;
-        progress.starsEarned = Mathf.Max(progress.starsEarned, stars);
-        progress.bestTime = progress.bestTime == 0 ? time : Mathf.Min(progress.bestTime, time);
-        progress.coinsCollected += coins;
         SaveProgress();
     }
 

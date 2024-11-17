@@ -35,7 +35,7 @@ public class LevelElement : MonoBehaviour
         levelNameText.text = levelId;
 
         // Get progress data
-        LevelProgressData progress = LevelSelection.Instance.GetLevelProgress(levelId);
+        LevelProgressData progress = LevelManager.Instance.GetLevelProgress(levelId);
 
         // Setup button
         playButton.onClick.AddListener(() => OnLevelSelected());
@@ -57,12 +57,10 @@ public class LevelElement : MonoBehaviour
                 totalObjects += group.totalItems;
             }
 
-            foreach (var group in levelPrefab.itemGroups)
-            {
-                foundObjects += group.totalItems - group.remainingItems;
-            }
+            foundObjects = progress.foundItems.Count;
 
-            float progressValue = totalObjects > 0 ? (float)foundObjects / totalObjects : 0;
+            // progress bar fills up with every object found
+            float progressValue = (float)foundObjects / totalObjects;
             progressBar.value = progressValue;
             progressText.text = $"{foundObjects}/{totalObjects}";
 
@@ -85,7 +83,7 @@ public class LevelElement : MonoBehaviour
     private void OnLevelSelected()
     {
         mainMenuScreen.SetActive(false);
-        LevelSelection.Instance.LoadLevel(levelId);
+        LevelManager.Instance.StartLevel(levelId);
     }
 
     private void OnDestroy()

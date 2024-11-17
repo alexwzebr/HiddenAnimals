@@ -6,6 +6,7 @@ public class HiddenObject : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float touchAreaRadius = 1f;
     [SerializeField] private string groupId;
+    [SerializeField] private string itemId;
     
     private PolygonCollider2D touchCollider;
     private bool isFound;
@@ -13,23 +14,66 @@ public class HiddenObject : MonoBehaviour
     public bool IsFound => isFound;
     public string GroupId => groupId;
     public float TouchAreaRadius => touchAreaRadius;
+    public string ItemId => itemId;
 
     private Animator animator;
     private Camera mainCamera;
 
-    private void Awake()
+    public void InitHiddenObject(string groupId)
     {
-        touchCollider = gameObject.GetComponent<PolygonCollider2D>();
-        
+        if (string.IsNullOrEmpty(itemId))
+        {
+            itemId = gameObject.name;
+        }
+
+        // Get required components
+        touchCollider = GetComponent<PolygonCollider2D>();
+        if (touchCollider == null)
+        {
+            Debug.LogError($"Missing PolygonCollider2D on {gameObject.name}");
+            return;
+        }
 
         animator = GetComponent<Animator>();
-        mainCamera = Camera.main;
-    }
+        if (animator == null)
+        {
+            Debug.LogWarning($"Missing Animator on {gameObject.name}");
+        }
 
-    public void Initialize(Sprite sprite, string groupId, float touchArea)
-    {
-        spriteRenderer.sprite = sprite;
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null)
+            {
+                Debug.LogError($"Missing SpriteRenderer on {gameObject.name}");
+                return;
+            }
+        }
+
+        mainCamera = Camera.main;
         this.groupId = groupId;
+
+        // Check if LevelManager is available
+        if (LevelManager.Instance == null)
+        {
+            Debug.LogError("LevelManager.Instance is null!");
+            return;
+        }
+
+        Level parentLevel = GetComponentInParent<Level>();
+        if (parentLevel == null)
+        {
+            Debug.LogError($"Cannot find parent Level component for {gameObject.name}");
+            return;
+        }
+
+        // Check if item was previously found
+        var progress = LevelManager.Instance.GetLevelProgress(parentLevel.levelName);
+        if (progress != null && progress.foundItems.Contains(itemId))
+        {
+            isFound = true;
+            gameObject.SetActive(false); // Use SetActive instead of Destroy for safety
+        }
     }
 
     public bool TryFind()
@@ -37,7 +81,37 @@ public class HiddenObject : MonoBehaviour
         if (isFound) return false;
         
         isFound = true;
-        touchCollider.enabled = false;
+        if (touchCollider != null)
+        {
+            touchCollider.enabled = false;
+        }
+
+        // Add null checks
+        Level level = GetComponentInParent<Level>();
+        if (level == null)
+        {
+            Debug.LogError($"Cannot find parent Level component for {gameObject.name}");
+            return true;
+        }
+
+        if (LevelManager.Instance == null)
+        {
+            Debug.LogError("LevelManager.Instance is null!");
+            return true;
+        }
+
+        var progress = LevelManager.Instance.GetLevelProgress(level.levelName);
+        if (progress == null)
+        {
+            Debug.LogError($"Could not get progress for level: {level.levelName}");
+            return true;
+        }
+
+        if (!progress.foundItems.Contains(itemId))
+        {
+            progress.foundItems.Add(itemId);
+            LevelManager.Instance.SaveProgress();
+        }
 
         return true;
     }

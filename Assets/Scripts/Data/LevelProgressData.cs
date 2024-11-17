@@ -1,20 +1,17 @@
 using System;
+using System.Collections.Generic;
 
 [Serializable]
 public class LevelProgressData
 {
     public string levelId;
     public bool isCompleted;
-    public int starsEarned;
-    public float bestTime;
-    public int coinsCollected;
+    public List<string> foundItems;
 
     public LevelProgressData(string levelId)
     {
         this.levelId = levelId;
         isCompleted = false;
-        starsEarned = 0;
-        bestTime = 0f;
-        coinsCollected = 0;
+        foundItems = new List<string>();
     }
 } 
