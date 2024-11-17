@@ -215,7 +215,7 @@ public class Level : MonoBehaviour
             confettiEffect.Play();
             
             // Save progress
-            LevelsManager.Instance.UpdateLevelProgress(
+            LevelSelection.Instance.UpdateLevelProgress(
                 levelName,
                 true,
                 starsEarned,

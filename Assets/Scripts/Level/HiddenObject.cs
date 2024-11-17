@@ -7,7 +7,7 @@ public class HiddenObject : MonoBehaviour
     [SerializeField] private float touchAreaRadius = 1f;
     [SerializeField] private string groupId;
     
-    private CircleCollider2D touchCollider;
+    private PolygonCollider2D touchCollider;
     private bool isFound;
 
     public bool IsFound => isFound;
@@ -15,30 +15,21 @@ public class HiddenObject : MonoBehaviour
     public float TouchAreaRadius => touchAreaRadius;
 
     private Animator animator;
+    private Camera mainCamera;
 
     private void Awake()
     {
-        touchCollider = gameObject.AddComponent<CircleCollider2D>();
-        touchCollider.isTrigger = true;
-        UpdateTouchArea(touchAreaRadius);
+        touchCollider = gameObject.GetComponent<PolygonCollider2D>();
+        
 
         animator = GetComponent<Animator>();
+        mainCamera = Camera.main;
     }
 
     public void Initialize(Sprite sprite, string groupId, float touchArea)
     {
         spriteRenderer.sprite = sprite;
         this.groupId = groupId;
-        UpdateTouchArea(touchArea);
-    }
-
-    public void UpdateTouchArea(float radius)
-    {
-        touchAreaRadius = radius;
-        if (touchCollider != null)
-        {
-            touchCollider.radius = radius;
-        }
     }
 
     public bool TryFind()
@@ -47,6 +38,7 @@ public class HiddenObject : MonoBehaviour
         
         isFound = true;
         touchCollider.enabled = false;
+
         return true;
     }
 
@@ -63,21 +55,28 @@ public class HiddenObject : MonoBehaviour
         
         // Add 1 second delay
         sequence.AppendInterval(1f);
+
+        // Store the world position before parenting
+        Vector3 startWorldPos = transform.position;
         
-        // Calculate a control point for curved path
-        Vector3 startPos = transform.position;
-        Vector3 controlPoint = Vector3.Lerp(startPos, targetWorldPosition, 0.5f);
+        // Parent to camera and convert target to local space
+        transform.SetParent(mainCamera.transform);
+        Vector3 targetLocalPos = mainCamera.transform.InverseTransformPoint(targetWorldPosition);
+        Vector3 startLocalPos = mainCamera.transform.InverseTransformPoint(startWorldPos);
+        
+        // Calculate control point in local space
+        Vector3 controlPoint = Vector3.Lerp(startLocalPos, targetLocalPos, 0.5f);
         controlPoint += new Vector3(0, 2f, 0); // Add some height to the curve
 
-        // Create path
-        Vector3[] path = new Vector3[] { startPos, controlPoint, targetWorldPosition };
+        // Create path in local space
+        Vector3[] path = new Vector3[] { startLocalPos, controlPoint, targetLocalPos };
 
         sequence.AppendCallback(() => {
             animator.enabled = false;
         });
 
-        // Path movement
-        sequence.Append(transform.DOPath(path, 0.5f, PathType.CatmullRom)
+        // Path movement in local space
+        sequence.Append(transform.DOLocalPath(path, 0.5f, PathType.CatmullRom)
             .SetEase(Ease.OutQuad));
 
         // Scale down

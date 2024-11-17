@@ -53,6 +53,10 @@ public class ItemScatterTool : MonoBehaviour
             float x = Random.Range(minX, maxX);
             float y = Random.Range(minY, maxY);
             itemObj.transform.localPosition = new Vector3(x, y, 0);
+
+            PolygonCollider2D polygonCollider = itemObj.GetComponent<PolygonCollider2D>();
+            polygonCollider.pathCount = 1;
+            polygonCollider.SetPath(0, sprite.vertices);
         }
 #endif
     }

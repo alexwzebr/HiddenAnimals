@@ -18,23 +18,6 @@ public class GoalsPanel : MonoBehaviour
         mainCamera = Camera.main;
     }
 
-    private void Start()
-    {
-        // Find and initialize with current level
-        if (LevelsManager.Instance != null)
-        {
-            Level level = FindObjectOfType<Level>();
-            if (level != null)
-            {
-                Initialize(level);
-            }
-            else
-            {
-                Debug.LogError("No Level found in the scene!");
-            }
-        }
-    }
-
     public void Initialize(Level level)
     {
         if (level == null)

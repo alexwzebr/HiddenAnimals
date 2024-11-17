@@ -1,38 +1,51 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 
-public class LevelsManager : MonoBehaviour
+public class LevelSelection : MonoBehaviour
 {
     private const string CURRENT_LEVEL_KEY = "CurrentLevel";
     private const string LEVEL_PROGRESS_KEY = "LevelProgress";
 
-    [SerializeField] private Level[] levelPrefabs;
+    [SerializeField] private GridLayoutGroup levelGrid;
+    [SerializeField] private GameObject mainMenuScreen;
     [SerializeField] private Transform levelContainer;
-    
+
     private Dictionary<string, LevelProgressData> levelProgress;
+    private Level[] levelPrefabs;
     private string currentLevelId;
     private Level currentLevel;
 
-    public static LevelsManager Instance { get; private set; }
+    public static LevelSelection Instance { get; private set; }
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
-            LoadProgress();
-            
-            // Load initial level
-            if (levelPrefabs != null && levelPrefabs.Length > 0)
-            {
-                LoadLevel(currentLevelId);
-            }
+            InitializeLevels();
         }
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    private void InitializeLevels()
+    {
+        // Get all level elements from the grid
+        LevelElement[] levelElements = levelGrid.GetComponentsInChildren<LevelElement>();
+        levelPrefabs = levelElements.Select(le => le.LevelPrefab).ToArray();
+
+        LoadProgress();
+
+        // Initialize each level element
+        for (int i = 0; i < levelElements.Length; i++)
+        {
+            bool isUnlocked = i == 0 || IsLevelUnlocked(levelElements[i].LevelPrefab.levelName);
+            levelElements[i].Initialize(isUnlocked);
+            levelElements[i].mainMenuScreen = mainMenuScreen;
         }
     }
 
@@ -80,14 +93,6 @@ public class LevelsManager : MonoBehaviour
         if (currentLevel != null)
         {
             Destroy(currentLevel.gameObject);
-        }
-
-        // Ensure we have a container
-        if (levelContainer == null)
-        {
-            Debug.LogWarning("Level container not set, creating one");
-            GameObject containerObj = new GameObject("LevelContainer");
-            levelContainer = containerObj.transform;
         }
 
         currentLevelId = levelId;
