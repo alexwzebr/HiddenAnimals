@@ -21,12 +21,11 @@ public class Level : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private GameObject itemFoundEffectPrefab;
-    [SerializeField] private ParticleSystem confettiEffect;
+    public UnityEvent onLevelComplete = new UnityEvent();
     
     private Camera mainCamera;
     
     public UnityEvent<Vector3, string> onItemFound = new UnityEvent<Vector3, string>();
-    public UnityEvent onLevelComplete = new UnityEvent();
 
     private Vector2 touchStartPosition;
     private bool isTouchValid = false;
@@ -232,15 +231,22 @@ public class Level : MonoBehaviour
         }
 
         if (isComplete)
-        {
-            confettiEffect.Play();
-            
+        {   
             // Save progress
             LevelManager.Instance.UpdateLevelProgress(
                 levelName,
                 true
             );
-            
+
+            LevelManager.Instance.OnLevelComplete();
+            //hide goals panel
+            GoalsPanel goalsPanel = FindObjectOfType<GoalsPanel>();
+            if (goalsPanel != null)
+            {
+                goalsPanel.gameObject.SetActive(false);
+            }
+
+            // Notify listeners (UI will handle this)
             onLevelComplete.Invoke();
         }
     }

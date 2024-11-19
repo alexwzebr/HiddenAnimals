@@ -316,7 +316,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a27070688f73405a848da503c597138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: Bedroom
+  levelName: Missing Whiskers
   coinsReward: 5
   itemGroups:
   - groupName: Cats

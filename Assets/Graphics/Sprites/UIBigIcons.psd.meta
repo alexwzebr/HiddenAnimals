@@ -136,7 +136,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Food 1
+      name: Case Bgr
       rect:
         serializedVersion: 2
         x: 0
@@ -157,7 +157,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Food 2
+      name: Logo
       rect:
         serializedVersion: 2
         x: 256
@@ -483,12 +483,12 @@ TextureImporter:
     secondaryTextures: []
     nameFileIdTable:
       BrokenHeart: -1456228026
-      Food 1: -1861151504
-      Food 2: 2030184239
+      Case Bgr: -1861151504
       Food 3: 1185687426
       Food 4: -371696959
       Food 5: -1938102053
       Heart: 333904041
+      Logo: 2030184239
       Road: -1641226614
       Scissors1: 219419759
       Scissors2: -1836778592

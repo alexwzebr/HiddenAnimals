@@ -18,6 +18,9 @@ public class LevelManager : MonoBehaviour
 
     public static LevelManager Instance { get; private set; }
 
+    public GameObject levelCompleteScreen;
+    public GameObject levelCompleteConfetti;
+
     private void Awake()
     {
         if (Instance == null)
@@ -162,6 +165,21 @@ public class LevelManager : MonoBehaviour
         mainMenuScreen.SetActive(true);
         
     }
+
+    public void OnLevelComplete()
+    {
+        levelCompleteScreen.SetActive(true);
+        levelCompleteConfetti.SetActive(true);
+        Destroy(levelCompleteConfetti, 3f);
+    }
+
+    public void OnNextLevelButtonClicked()
+    {
+        levelCompleteScreen.SetActive(false);
+        levelCompleteConfetti.SetActive(false);
+        ReturnToMainMenu();
+    }
+
 }
 
 [System.Serializable]
